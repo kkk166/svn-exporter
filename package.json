@@ -1,0 +1,60 @@
+{
+  "name": "svn-exporter",
+  "displayName": "SVN Exporter",
+  "description": "一键导出 SVN 变更文件到指定文件夹，保留完整目录结构",
+  "version": "0.0.1",
+  "publisher": "kkk166",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "keywords": [
+    "svn",
+    "export",
+    "changes",
+    "diff",
+    "subversion",
+    "导出",
+    "变更"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kkk166/svn-exporter.git"
+  },
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "svn-exporter.export",
+        "title": "导出变更文件",
+        "category": "SVN",
+        "icon": "$(export)"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "svn-exporter.export",
+          "group": "navigation",
+          "when": "scmProvider == svn"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.4"
+  }
+}
