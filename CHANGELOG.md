@@ -11,3 +11,5 @@
 - 自动忽略 SVN 外部定义和忽略项
 - 跳过已删除文件，显示导出进度通知
 - 支持 SCM 面板快捷按钮
+
+[0.0.1]: https://github.com/kkk166/svn-exporter/releases/tag/v0.0.1

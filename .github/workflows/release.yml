@@ -29,8 +29,22 @@ jobs:
       - name: 打包扩展
         run: vsce package
 
+      - name: 提取 CHANGELOG 内容
+        id: changelog
+        run: |
+          # 提取当前版本对应的更新内容（从 ## [x.x.x] 到下一个 ##）
+          TAG=${GITHUB_REF#refs/tags/v}
+          CONTENT=$(awk "/^## \[$TAG\]/{found=1; next} /^## \[/{if(found) exit} found{print}" CHANGELOG.md)
+          if [ -z "$CONTENT" ]; then
+            CONTENT="详见 [CHANGELOG.md](CHANGELOG.md)"
+          fi
+          # 写入多行环境变量
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: 创建 Release 并上传 .vsix
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          body: ${{ steps.changelog.outputs.body }}
           files: '*.vsix'
