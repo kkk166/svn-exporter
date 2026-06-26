@@ -10,5 +10,5 @@ vsc-extension-quickstart.md
 **/*.ts
 **/.vscode-test.*
 .git/**
-node_modules/**
+.github/**
 .claude/**
