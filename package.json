@@ -1,8 +1,8 @@
 {
   "name": "svn-exporter",
   "displayName": "SVN Exporter",
-  "description": "一键导出 SVN 变更文件到指定文件夹，保留完整目录结构",
-  "version": "0.0.2",
+  "description": "一键导出 SVN 本地变更文件或远程更新文件到指定文件夹，保留完整目录结构",
+  "version": "0.1.0",
   "publisher": "kkk166",
   "license": "MIT",
   "icon": "resources/icon.png",
@@ -34,12 +34,23 @@
         "title": "导出变更文件",
         "category": "SVN",
         "icon": "$(export)"
+      },
+      {
+        "command": "svn-exporter.exportRemote",
+        "title": "导出远程更新文件",
+        "category": "SVN",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
       "scm/title": [
         {
           "command": "svn-exporter.export",
+          "group": "navigation",
+          "when": "scmProvider == svn"
+        },
+        {
+          "command": "svn-exporter.exportRemote",
           "group": "navigation",
           "when": "scmProvider == svn"
         }
@@ -49,12 +60,14 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && mocha \"out/test/**/*.test.js\""
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "16.x",
     "@types/vscode": "^1.74.0",
+    "mocha": "^10.8.2",
     "typescript": "^4.9.4"
   },
   "dependencies": {

@@ -7,35 +7,34 @@ export interface ChangedEntry {
     path: string;
 }
 
-/** 需要跳过的状态：X 外部、I 忽略、空白 无变更、! 文件丢失（无法导出） */
-const SKIP_STATUS = new Set(['X', 'I', ' ', '!']);
+/**
+ * 合法状态行的格式：7 个状态列 + 1 个空格 + 路径。
+ *
+ * 用白名单而不是“跳过黑名单”，是因为 `svn status` 还会输出非状态行
+ * （changelist 标题、冲突汇总、外部项提示等），黑名单会把它们误判成文件。
+ *
+ * 第 1 列只接受有内容变更的状态（A 新增、C 冲突、D 删除、M 修改、R 替换、
+ * ? 未纳入版本控制、~ 类型变化），因此以下情况都不匹配：
+ *   - X 外部、I 忽略、! 文件丢失（无法导出）
+ *   - 第 1 列为空白的行：包括只改了属性的文件——复制带不走 SVN 属性，
+ *     导出的文件内容与仓库一致，没有意义
+ * 第 2~7 列分别是属性、锁定、历史、切换、锁令牌、树冲突标记。
+ */
+const STATUS_LINE = /^([ACDMR?~])[ CM][ L][ +][ SX][ KOTB][ C] (.+)$/;
 
 /**
  * 解析 `svn status` 的单行输出。
  *
- * SVN status 行格式：前若干列为状态标记（第 1 列是主状态），
- * 路径从第 8 列开始。这里不按固定下标 trim 整行，而是：
- *   - 先剥离行尾的 \r（兼容 Windows CRLF）
- *   - 主状态取第 1 个字符
- *   - 路径取第 8 列之后的内容，仅裁剪左侧空白，
- *     保留文件名本身可能存在的首尾空格
+ * 仅剥离行尾换行符（兼容 Windows CRLF），不 trim 整行，
+ * 以保留文件名本身可能存在的首尾空格。
  *
- * @returns 解析结果；若该行应被跳过或不合法则返回 null
+ * @returns 解析结果；若该行应被跳过或不是状态行则返回 null
  */
 export function parseStatusLine(rawLine: string): ChangedEntry | null {
-    // 仅去掉行尾换行符，避免破坏文件名首尾空格
     const line = rawLine.replace(/[\r\n]+$/, '');
-    if (line.length < 8) {
+    const match = STATUS_LINE.exec(line);
+    if (!match) {
         return null;
     }
-    const status = line[0];
-    if (SKIP_STATUS.has(status)) {
-        return null;
-    }
-    // 路径从第 8 列开始；前 7 列是状态标记区，用左裁剪去掉它们之间的填充空格
-    const filePath = line.substring(7).replace(/^\s+/, '');
-    if (!filePath) {
-        return null;
-    }
-    return { status, path: filePath };
+    return { status: match[1], path: match[2] };
 }
